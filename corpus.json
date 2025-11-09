@@ -1,0 +1,24 @@
+[
+  {
+    "title": "Reparodynamics: Unified Five-Law System (v2.0)",
+    "doi": "10.5281/zenodo.17538091",
+    "url": "https://doi.org/10.5281/zenodo.17538091",
+    "date": "2025-11-06",
+    "views": 550,
+    "downloads": 309,
+    "topic": "Core Theory",
+    "tags": ["Reparodynamics","Five Laws","Open Science"],
+    "abstract": "Definitive v2.0 consolidating the unified five-law system for energy-bounded, aligned self-repair across domains."
+  },
+  {
+    "title": "TGRM: Targeted Gradient Repair Mechanism",
+    "doi": "10.5281/zenodo.17273433",
+    "url": "https://doi.org/10.5281/zenodo.17273433",
+    "date": "2025-10-01",
+    "views": 100,
+    "downloads": 80,
+    "topic": "Core Theory",
+    "tags": ["TGRM","Algorithms"],
+    "abstract": "Predictive repair architecture applying minimal-energy corrections with verified improvement."
+  }
+]
