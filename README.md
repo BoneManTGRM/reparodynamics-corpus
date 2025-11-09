@@ -9,8 +9,7 @@ A free static site indexing **all Zenodo records** by **Cody Ryan Jenkins**.
 
 ### Schema
 ```json
-{
-  "title": "Paper title",
+{ "title": "Paper title",
   "doi": "10.5281/zenodo.xxxxxxxx",
   "url": "https://doi.org/10.5281/zenodo.xxxxxxxx",
   "date": "YYYY-MM-DD",
