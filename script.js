@@ -1,54 +1,78 @@
-async function load(){
-  const res = await fetch('corpus.json'); 
-  const data = await res.json();
-  const listEl = document.getElementById('list');
-  const qEl = document.getElementById('q'); 
-  const topicEl = document.getElementById('topic'); 
-  const sortEl = document.getElementById('sort');
-  const statsEl = document.getElementById('stats');
+// script.js — pulls ALL your Zenodo records and renders them
 
-  function render(items){
-    listEl.innerHTML='';
-    items.forEach(it=>{
-      const el=document.createElement('article'); 
-      el.className='card';
-      el.innerHTML = `
-        <a class="title" href="${it.url}" target="_blank" rel="noopener">${it.title}</a>
-        <div class="meta">
-          <span class="badge">📅 ${it.date||''}</span>
-          ${it.views!=null?`<span class="badge">👁 ${it.views}</span>`:''}
-          ${it.downloads!=null?`<span class="badge">⬇︎ ${it.downloads}</span>`:''}
-          <span class="badge">🔖 ${it.topic||''}</span>
-          <span class="badge">🔗 ${it.doi||''}</span>
-        </div>
-        <p class="abstract">${it.abstract||''}</p>
-        <div class="tags">${(it.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
-      listEl.appendChild(el);
-    });
-    statsEl.textContent = `${items.length} records • ${new Date().toLocaleString()}`;
+const LIST = document.getElementById('list');
+
+// Change this to your exact name as it appears on Zenodo
+const AUTHOR = 'Cody Ryan Jenkins';
+
+// how many per page Zenodo should return (max 200)
+const PAGE_SIZE = 200;
+
+async function fetchAllZenodo(author) {
+  // We’ll pull pages until Zenodo returns fewer than PAGE_SIZE
+  let page = 1;
+  let all = [];
+
+  while (true) {
+    const url = new URL('https://zenodo.org/api/records');
+    url.searchParams.set('q', `creators.name:"${author.replace(/"/g, '\\"')}"`);
+    url.searchParams.set('size', PAGE_SIZE.toString());
+    url.searchParams.set('page', page.toString());
+    url.searchParams.set('sort', 'mostrecent');
+
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error(`Zenodo error: ${res.status}`);
+    const data = await res.json();
+
+    const hits = Array.isArray(data.hits?.hits) ? data.hits.hits : [];
+    all = all.concat(hits);
+    if (hits.length < PAGE_SIZE) break; // no more pages
+    page++;
   }
 
-  function apply(){
-    const q=(qEl.value||'').toLowerCase(); 
-    const topic=topicEl.value; 
-    let items=data.slice();
-    if(q){ items=items.filter(it=>(it.title+it.abstract+(it.tags||[]).join(' ')).toLowerCase().includes(q)); }
-    if(topic){ items=items.filter(it=>it.topic===topic); }
-    const key=sortEl.value;
-    items.sort((a,b)=>{
-      if(key==='date_desc') return (b.date||'').localeCompare(a.date||'');
-      if(key==='date_asc') return (a.date||'').localeCompare(b.date||'');
-      if(key==='views_desc') return (b.views||0)-(a.views||0);
-      if(key==='downloads_desc') return (b.downloads||0)-(a.downloads||0);
-      if(key==='title_asc') return (a.title||'').localeCompare(b.title||'');
-      return 0;
-    });
-    render(items);
-  }
-
-  qEl.addEventListener('input',apply); 
-  topicEl.addEventListener('change',apply); 
-  sortEl.addEventListener('change',apply);
-  apply();
+  return all;
 }
-load();
+
+function render(records) {
+  if (!records.length) {
+    LIST.innerHTML = `<p>No records found for ${AUTHOR}.</p>`;
+    return;
+  }
+
+  const html = records.map(r => {
+    const title = r.metadata?.title || 'Untitled';
+    const doi = r.metadata?.doi ? `https://doi.org/${r.metadata.doi}` : null;
+    const link = r.links?.html || doi || '#';
+    const date = r.metadata?.publication_date || r.created || '';
+    const desc = r.metadata?.description
+      ? r.metadata.description.replace(/<[^>]*>/g, '').slice(0, 280) + '…'
+      : '';
+
+    return `
+      <article class="card">
+        <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
+        <p class="meta">${date}${doi ? ` · <a href="${doi}" target="_blank" rel="noopener noreferrer">DOI</a>` : ''}</p>
+        ${desc ? `<p>${desc}</p>` : ''}
+        ${Array.isArray(r.files) && r.files.length
+          ? `<p class="files">${r.files.slice(0,3).map(f => 
+              `<a href="${f.links?.self}" target="_blank" rel="noopener noreferrer">${f.key}</a>`
+            ).join(' · ')}${r.files.length > 3 ? ' · …' : ''}</p>`
+          : ''
+        }
+      </article>
+    `;
+  }).join('');
+
+  LIST.innerHTML = html;
+}
+
+(async () => {
+  LIST.innerHTML = '<p>Loading your Zenodo corpus…</p>';
+  try {
+    const records = await fetchAllZenodo(AUTHOR);
+    render(records);
+  } catch (e) {
+    console.error(e);
+    LIST.innerHTML = `<p>Couldn’t load Zenodo records. ${e.message}</p>`;
+  }
+})();
