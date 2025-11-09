@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Reparodynamics Corpus — Cody Ryan Jenkins</title>
+<meta name="description" content="Master index of the Reparodynamics open-science corpus by Cody Ryan Jenkins (RYE, TGRM, SubReparo, hardware, biology, simulations)."/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<header>
+  <h1>Reparodynamics Corpus</h1>
+  <p class="sub">All Zenodo publications by <strong>Cody Ryan Jenkins</strong>. Search, filter, and sort. 100% static, free to host on GitHub Pages.</p>
+  <nav>
+    <input id="q" placeholder="Search title, abstract, tags…" autocomplete="off"/>
+    <select id="topic">
+      <option value="">All topics</option>
+      <option>Core Theory</option><option>Applications</option><option>Simulations</option>
+      <option>Hardware</option><option>Biology</option><option>Defense</option><option>SubReparo</option>
+    </select>
+    <select id="sort">
+      <option value="date_desc">Newest</option><option value="date_asc">Oldest</option>
+      <option value="views_desc">Most viewed</option><option value="downloads_desc">Most downloaded</option>
+      <option value="title_asc">Title A–Z</option>
+    </select>
+  </nav>
+</header>
+<section class="stats" id="stats"></section>
+<main id="list" aria-live="polite"></main>
+<footer>
+  <p>Open science • CC BY 4.0 • Built for GitHub Pages.</p>
+  <p><a href="corpus.json">corpus.json</a> • <a href="README.md">README</a></p>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
