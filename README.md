@@ -1,12 +1,10 @@
 # Reparodynamics Corpus (Static Index)
 
-A free static site indexing **all Zenodo records** by **Cody Ryan Jenkins**.
+A fully open, self-updating static index of all **Zenodo publications** by **Cody Ryan Jenkins**, documenting the Reparodynamics framework — including RYE (Repair Yield per Energy), TGRM (Targeted Gradient Repair Mechanism), SubReparo, ReparoLife, and related domains.
 
-## How to update
-1. Edit `corpus.json` directly in GitHub.
-2. Add new paper entries in the same format.
-3. Commit changes — the site updates automatically.
+This site automatically deploys to GitHub Pages and provides searchable, filterable access to every published record in the Reparodynamics corpus.
 
-### Schema
-```json
-{ 
+---
+
+## 🌐 Live Site
+Once deployed, access it here:
