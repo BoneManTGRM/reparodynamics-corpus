@@ -1,36 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Reparodynamics Corpus — Cody Ryan Jenkins</title>
-<meta name="description" content="Master index of the Reparodynamics open-science corpus by Cody Ryan Jenkins (RYE, TGRM, SubReparo, hardware, biology, simulations)."/>
-<link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reparodynamics Corpus</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background-color: #0d1117;
+      color: #e6edf3;
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #58a6ff;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    p.intro {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      color: #8b949e;
+    }
+    #list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .card {
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #58a6ff;
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    .card h3 a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+    .card h3 a:hover {
+      text-decoration: underline;
+    }
+    .card p.meta {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-bottom: 0.75rem;
+    }
+    .card p {
+      margin-bottom: 0.75rem;
+    }
+    .card .files a {
+      color: #a5d6ff;
+      text-decoration: none;
+    }
+    .card .files a:hover {
+      text-decoration: underline;
+    }
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      color: #8b949e;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
-<header>
   <h1>Reparodynamics Corpus</h1>
-  <p class="sub">All Zenodo publications by <strong>Cody Ryan Jenkins</strong>. Search, filter, and sort. 100% static, free to host on GitHub Pages.</p>
-  <nav>
-    <input id="q" placeholder="Search title, abstract, tags…" autocomplete="off"/>
-    <select id="topic">
-      <option value="">All topics</option>
-      <option>Core Theory</option><option>Applications</option><option>Simulations</option>
-      <option>Hardware</option><option>Biology</option><option>Defense</option><option>SubReparo</option>
-    </select>
-    <select id="sort">
-      <option value="date_desc">Newest</option><option value="date_asc">Oldest</option>
-      <option value="views_desc">Most viewed</option><option value="downloads_desc">Most downloaded</option>
-      <option value="title_asc">Title A–Z</option>
-    </select>
-  </nav>
-</header>
-<section class="stats" id="stats"></section>
-<main id="list" aria-live="polite"></main>
-<footer>
-  <p>Open science • CC BY 4.0 • Built for GitHub Pages.</p>
-  <p><a href="corpus.json">corpus.json</a> • <a href="README.md">README</a></p>
-</footer>
-<script src="script.js"></script>
+  <p class="intro">
+    An open-science archive documenting the principles of adaptive self-repair, TGRM, and RYE — authored by Cody Ryan Jenkins.
+  </p>
+
+  <!-- Zenodo entries will appear here -->
+  <div id="list"></div>
+
+  <footer>
+    Powered by <a href="https://zenodo.org" target="_blank" rel="noopener noreferrer" style="color:#58a6ff;">Zenodo</a> · Hosted on <a href="https://github.com/BoneManTGRM/reparodynamics-corpus" target="_blank" rel="noopener noreferrer" style="color:#58a6ff;">GitHub Pages</a>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
