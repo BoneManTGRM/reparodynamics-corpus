@@ -1,89 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
   <title>Reparodynamics Corpus</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root { color-scheme: dark; }
-    * { box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: #0d1117;
-      color: #e6edf3;
-      margin: 0;
-      padding: 2rem;
-      line-height: 1.6;
-    }
-    header { text-align: center; margin-bottom: 1rem; }
-    h1 {
-      font-size: 2rem;
-      color: #58a6ff;
-      margin: 0 0 .5rem 0;
-    }
-    p.intro {
-      color: #8b949e;
-      margin: 0 auto 1rem;
-      max-width: 800px;
-    }
-    #list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    .card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      padding: 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,.35);
-      transition: transform .15s ease, border-color .15s ease;
-    }
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: #58a6ff;
-    }
-    .card h3 {
-      font-size: 1.05rem;
-      margin: 0 0 .5rem 0;
-    }
-    .card h3 a { color: #58a6ff; text-decoration: none; }
-    .card h3 a:hover { text-decoration: underline; }
-    .meta {
-      font-size: .9rem;
-      color: #8b949e;
-      margin: 0 0 .75rem 0;
-    }
-    .files a { color: #a5d6ff; text-decoration: none; }
-    .files a:hover { text-decoration: underline; }
-    footer {
-      text-align: center;
-      margin-top: 3rem;
-      color: #8b949e;
-      font-size: .95rem;
-    }
-    footer a { color: #58a6ff; }
-    /* small helper for inline code in diagnostics */
-    code { background: #0b1220; padding: .1rem .3rem; border-radius: 4px; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background:#0f1216; color:#e5e7eb; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 28px 18px 60px; }
+    .hero { background:#121820; border:1px solid #1f2835; border-radius:12px; padding:28px; margin-bottom:28px; }
+    h1 { font-size: 40px; margin:0 0 8px; color:#6ba8ff; }
+    p { margin:6px 0 0; opacity:.9; }
+    .status { margin:20px 0; padding:12px 14px; border:1px dashed #2a3547; border-radius:10px; background:#0e141d; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    ul#list { list-style:none; padding:0; margin:14px 0 0; }
+    ul#list li { padding:12px 0; border-bottom:1px solid #1e2736; }
+    ul#list li a { color:#9ec5ff; text-decoration:none; }
+    .meta { font-size:.92em; opacity:.85; margin-top:4px; }
+    .footer { margin-top:28px; opacity:.7; font-size:.95em; }
+    code.q { background:#0d1117; border:1px solid #273244; border-radius:6px; padding:2px 6px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Reparodynamics Corpus</h1>
-    <p class="intro">
-      Open science archive by Cody Ryan Jenkins. This page loads publications directly from Zenodo and shows the latest first.
-    </p>
-  </header>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Reparodynamics Corpus</h1>
+      <p>Open science archive by Cody Ryan Jenkins. This page loads publications directly from Zenodo and shows the latest first.</p>
+    </div>
 
-  <!-- Zenodo entries will render here -->
-  <div id="list"></div>
+    <div class="status" id="status">
+      Loading your Zenodo corpus...
+    </div>
 
-  <footer>
-    Powered by <a href="https://zenodo.org" target="_blank" rel="noopener noreferrer">Zenodo</a> ·
-    Hosted on <a href="https://github.com/BoneManTGRM/reparodynamics-corpus" target="_blank" rel="noopener noreferrer">GitHub Pages</a>
-  </footer>
+    <ul id="list"><li>Waiting for results</li></ul>
+
+    <div class="footer">
+      Powered by <a href="https://zenodo.org" target="_blank" rel="noopener">Zenodo</a> · Hosted on <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
