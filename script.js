@@ -1,144 +1,102 @@
-// Robust Zenodo loader with on page diagnostics
-// Put this file at the repo root as script.js
-
-const LIST = document.getElementById('list');
-
-// If Zenodo spells the author differently, add it here
-const AUTHOR_CANDIDATES = [
-  'Cody Ryan Jenkins',
-  'Jenkins, Cody Ryan',
-  'Cody R. Jenkins'
-];
-
-// Page size per API call
-const PAGE_SIZE = 200;
-
-// write a diagnostic line into the page
-function diag(msg) {
-  const p = document.createElement('p');
-  p.style.color = '#8b949e';
-  p.style.fontSize = '0.9rem';
-  p.innerHTML = msg;
-  LIST.appendChild(p);
-}
-
-function clearList() {
-  LIST.innerHTML = '';
-}
-
-function escapeQuotes(s) {
-  return s.replace(/"/g, '\\"');
-}
-
-function buildQueries() {
-  const qs = [];
-  // exact creators.name
-  for (const a of AUTHOR_CANDIDATES) {
-    qs.push(`creators.name:"${escapeQuotes(a)}"`);
-  }
-  // phrase search as fallback
-  for (const a of AUTHOR_CANDIDATES) {
-    qs.push(`"${escapeQuotes(a)}"`);
-  }
-  // final safety keyword
-  qs.push('Reparodynamics');
-  return qs;
-}
-
-async function fetchAllForQuery(q) {
-  let page = 1;
-  let all = [];
-  while (true) {
-    const url = new URL('https://zenodo.org/api/records');
-    url.searchParams.set('q', q);
-    url.searchParams.set('size', String(PAGE_SIZE));
-    url.searchParams.set('page', String(page));
-    url.searchParams.set('sort', 'mostrecent');
-
-    const res = await fetch(url.toString());
-    if (!res.ok) throw new Error(`Zenodo error ${res.status} for query: ${q}`);
-    const data = await res.json();
-    const hits = Array.isArray(data.hits?.hits) ? data.hits.hits : [];
-    all = all.concat(hits);
-    if (hits.length < PAGE_SIZE) break;
-    page++;
-  }
-  return all;
-}
-
-function cardHTML(r) {
-  const title = r.metadata?.title || 'Untitled';
-  const doi = r.metadata?.doi ? `https://doi.org/${r.metadata.doi}` : null;
-  const link = r.links?.html || doi || '#';
-  const date = r.metadata?.publication_date || r.created || '';
-  const rawDesc = r.metadata?.description || '';
-  const desc = rawDesc
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 280);
-
-  const files = Array.isArray(r.files) ? r.files : [];
-  const filesHTML = files.length
-    ? `<p class="files">${files.slice(0, 3).map(f =>
-        `<a href="${f.links?.self}" target="_blank" rel="noopener noreferrer">${f.key}</a>`
-      ).join(' · ')}${files.length > 3 ? ' · …' : ''}</p>`
-    : '';
-
-  return `
-    <article class="card">
-      <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
-      <p class="meta">${date}${doi ? ` · <a href="${doi}" target="_blank" rel="noopener noreferrer">DOI</a>` : ''}</p>
-      ${desc ? `<p>${desc}…</p>` : ''}
-      ${filesHTML}
-    </article>
-  `;
-}
-
-function render(records, label) {
-  clearList();
-
-  if (!records.length) {
-    LIST.innerHTML = `<p>No records found. Edit <code>AUTHOR_CANDIDATES</code> in <code>script.js</code> to match the exact name shown under Creators on Zenodo.</p>`;
-    diag(`Tried query group: <code>${label}</code>`);
-    return;
-  }
-
-  diag(`Loaded ${records.length} record(s) from Zenodo using <code>${label}</code>.`);
-  LIST.insertAdjacentHTML('beforeend', records.map(cardHTML).join(''));
-}
-
+<script>
 (async () => {
-  clearList();
-  LIST.innerHTML = '<p>Loading your Zenodo corpus…</p>';
+  const log = (m) => {
+    const el = document.getElementById('status') || document.body;
+    el.insertAdjacentHTML('beforeend', `<div style="opacity:.8">${m}</div>`);
+    console.log(m);
+  };
 
-  try {
-    diag('script.js loaded and running.');
-    const queries = buildQueries();
-    diag(`Trying ${queries.length} query variants.`);
+  const queries = [
+    'creators.name:"Cody Ryan Jenkins"',          // your usual
+    'creators.name:"Jenkins, Cody Ryan"',         // alt formatting
+    'creators.name:"Cody R. Jenkins"',            // with middle initial
+    '(title:Reparodynamics OR description:Reparodynamics OR keywords:Reparodynamics)',
+    '(title:"Targeted Gradient Repair Mechanism" OR description:"Targeted Gradient Repair Mechanism" OR keywords:TGRM)',
+    '(title:"Repair Yield per Energy" OR description:"Repair Yield per Energy" OR keywords:RYE)',
+    '(title:Jenkins AND Reparodynamics)'
+  ];
 
+  async function fetchWithBackoff(url, tries = 5, delay = 1200) {
+    for (let i = 0; i < tries; i++) {
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (res.status === 429) {
+        const wait = delay * Math.pow(2, i);
+        log(`Zenodo rate limited (429). Retrying in ${Math.round(wait/1000)}s...`);
+        await new Promise(r => setTimeout(r, wait));
+        continue;
+      }
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`Zenodo error ${res.status}: ${text.slice(0,200)}`);
+      }
+      return res.json();
+    }
+    throw new Error('Gave up after repeated 429s.');
+  }
+
+  async function search(query) {
+    const url = `https://zenodo.org/api/records/?q=${encodeURIComponent(query)}&sort=mostrecent&all_versions=true&page=1&size=200`;
+    log(`Query → ${query}`);
+    const data = await fetchWithBackoff(url);
+    const hits = (data && data.hits && data.hits.hits) || [];
+    return hits.map(h => ({
+      id: h.id,
+      doi: h.doi || (h.metadata && h.metadata.prereserve_doi && h.metadata.prereserve_doi.doi),
+      title: h.metadata?.title || '(no title)',
+      date: h.metadata?.publication_date || h.created || '',
+      url: h.links?.html || h.links?.self || '',
+      creators: (h.metadata?.creators || []).map(c => c.name).join(', ')
+    }));
+  }
+
+  async function loadAll() {
+    const seen = new Set();
+    let results = [];
+    log('script.js loaded and running.');
+    log(`Trying ${queries.length} query variants.`);
     for (const q of queries) {
       try {
-        const records = await fetchAllForQuery(q);
-        if (records.length) {
-          render(records, q);
-          return;
-        } else {
-          diag(`No results for <code>${q}</code>.`);
-        }
-      } catch (err) {
-        diag(err.message);
+        const rows = await search(q);
+        rows.forEach(r => { if (!seen.has(r.id)) { seen.add(r.id); results.push(r); } });
+        if (results.length) break; // stop at first query that returns papers
+        log(`No results for ${q}.`);
+      } catch (e) {
+        log(`Error for ${q}: ${e.message}`);
       }
     }
 
-    clearList();
-    LIST.innerHTML = `
-      <p>Could not find records automatically.</p>
-      <p>Open any one of your Zenodo records and copy the exact creator string, then add it to <code>AUTHOR_CANDIDATES</code>.</p>
-    `;
-  } catch (e) {
-    console.error(e);
-    clearList();
-    LIST.innerHTML = `<p>Could not load Zenodo records. ${e.message}</p>`;
+    if (!results.length) {
+      log('Still no results — likely a temporary Zenodo indexing or API issue. Showing a troubleshooting note instead of an empty list.');
+      document.getElementById('list').innerHTML =
+        `<li>Couldn’t fetch records right now. Try a hard refresh. If it persists, Zenodo search may be temporarily degraded. Your papers are still safe on Zenodo.</li>`;
+      return;
+    }
+
+    // sort newest first by date string
+    results.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+    const ul = document.getElementById('list');
+    ul.innerHTML = results.map(r => `
+      <li style="margin:0.5rem 0">
+        <a href="${r.url}" target="_blank" rel="noopener">${r.title}</a>
+        <div style="font-size:.9em;opacity:.8">${r.date} · ${r.creators}${r.doi ? ' · DOI: ' + r.doi : ''}</div>
+      </li>`).join('');
+    log(`Loaded ${results.length} records.`);
   }
+
+  // Ensure placeholders exist
+  if (!document.getElementById('status')) {
+    const s = document.createElement('div');
+    s.id = 'status';
+    s.style.margin = '1rem 0';
+    document.body.appendChild(s);
+  }
+  if (!document.getElementById('list')) {
+    const ul = document.createElement('ul');
+    ul.id = 'list';
+    document.body.appendChild(ul);
+  }
+
+  loadAll();
 })();
+</script>
